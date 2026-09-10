@@ -64,6 +64,15 @@
     line-height:1.4;
   }
 
+  .date-tag{
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.04em;
+    color:var(--teal);
+    opacity:0.85;
+  }
+
   .title{
     font-family:'Mochiy Pop One', sans-serif;
     font-size:44px;
@@ -182,6 +191,7 @@
 <div class="frame">
   <div class="panel">
     <div class="badge">TODAY'S WORD</div>
+    <div class="date-tag" id="dateTag"></div>
     <div class="title">MOMO</div>
     <div class="tagline">今日mo明日mo<br>have a nice day.</div>
 
@@ -332,6 +342,8 @@
 
   const today = new Date();
   const dateStr = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+  document.getElementById('dateTag').textContent =
+    `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
   const seed = seedFromDate(dateStr);
   const picked = quotes[seed % quotes.length];
 
