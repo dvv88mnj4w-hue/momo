@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日mo明日mo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#3FC6C2;
+    --teal-soft:#DFF6F5;
+    --ink:#3E7A78;
+    --pink:#FF8FAE;
+    --peach1:#FFC8B0;
+    --peach2:#FF9FA8;
+    --leaf:#8FBF7A;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0;
+    min-height:100vh;
+    font-family:'Zen Maru Gothic', sans-serif;
+    color:var(--ink);
+    background:#fff;
+  }
+  .frame{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background-image:url('frame-gingham.png');
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    padding:60px 44px;
+  }
+
+  .panel{
+    width:100%;
+    max-width:340px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:14px;
+  }
+
+  .badge{
+    font-family:'Mochiy Pop One', sans-serif;
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--teal);
+    border:1.5px solid var(--teal);
+    border-radius:999px;
+    padding:8px 20px;
+    line-height:1.4;
+  }
+
+  .title{
+    font-family:'Mochiy Pop One', sans-serif;
+    font-size:44px;
+    color:var(--teal);
+    letter-spacing:0.02em;
+  }
+
+  .tagline{
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    line-height:1.7;
+    color:var(--teal);
+  }
+
+  .result{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    min-height:70px;
+    opacity:0;
+    transform:translateY(6px);
+    transition:opacity .5s ease .15s, transform .5s ease .15s;
+  }
+  .result.show{ opacity:1; transform:translateY(0); }
+
+  .result-cat{
+    font-family:'Mochiy Pop One', sans-serif;
+    font-size:15px;
+    color:#fff;
+    background:linear-gradient(135deg, var(--peach2), var(--pink));
+    border-radius:999px;
+    padding:6px 20px;
+    letter-spacing:0.05em;
+  }
+
+  .result-quote{
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-weight:700;
+    font-size:17px;
+    line-height:1.8;
+    color:var(--ink);
+    white-space:pre-line;
+  }
+
+  .peach-wrap{
+    position:relative;
+    width:190px;
+    height:190px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .peach-wrap svg{ width:100%; height:100%; overflow:visible; }
+
+  .burst-layer{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:visible;
+  }
+  .confetti-piece{
+    position:absolute;
+    top:38%;
+    left:50%;
+    transform:translate(-50%,-50%);
+  }
+  .confetti-piece.star{
+    width:14px; height:14px;
+    clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+  .confetti-piece.ribbon{
+    width:5px; height:16px;
+    border-radius:3px;
+  }
+
+  .peach-left, .peach-right{
+    transition: transform .55s cubic-bezier(.34,1.56,.64,1);
+    transform-origin:60px 60px;
+  }
+  .peach-wrap.split .peach-left{ transform:translate(-16px,2px) rotate(-8deg); }
+  .peach-wrap.split .peach-right{ transform:translate(16px,2px) rotate(8deg); }
+
+  .sparkle{
+    opacity:0;
+    transform:scale(0.4);
+    transition:opacity .3s ease, transform .3s ease;
+  }
+  .peach-wrap.split .sparkle{ opacity:1; transform:scale(1); }
+
+  .peach-bounce{ animation:bounce 2.6s ease-in-out infinite; }
+  @keyframes bounce{
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    50%{ transform:translateY(-6px) rotate(-2deg); }
+  }
+
+  .tap-me{
+    font-family:'Mochiy Pop One', sans-serif;
+    font-size:20px;
+    color:var(--teal);
+  }
+  .tap-me.hide{ display:none; }
+
+  .again-note{
+    font-size:12px;
+    color:#8FBFBD;
+    display:none;
+  }
+  .again-note.show{ display:block; }
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="panel">
+    <div class="badge">TODAY'S WORD</div>
+    <div class="title">MOMO</div>
+    <div class="tagline">今日mo明日mo<br>have a nice day.</div>
+
+    <div class="peach-wrap peach-bounce" id="peachBtn">
+      <svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="60" cy="120" rx="34" ry="6" fill="#FFEFE6" opacity="0.6"/>
+        <!-- 左半分 -->
+        <g class="peach-left">
+          <path d="M60 30 C34 18 10 40 12 66 C14 92 36 108 60 100 Z" fill="#FFC8B0"/>
+          <path d="M60 30 C42 24 24 36 20 54 C34 50 50 42 60 30 Z" fill="#FF9FA8" opacity="0.55"/>
+          <circle cx="30" cy="52" r="4" fill="#FFFFFF" opacity="0.7"/>
+        </g>
+        <!-- 右半分 -->
+        <g class="peach-right">
+          <path d="M60 30 C86 18 110 40 108 66 C106 92 84 108 60 100 Z" fill="#FFB6A8"/>
+          <path d="M60 30 C78 24 96 36 100 54 C86 50 70 42 60 30 Z" fill="#FF8F9E" opacity="0.5"/>
+          <circle cx="92" cy="46" r="3" fill="#FFFFFF" opacity="0.6"/>
+        </g>
+        <!-- 葉っぱ（下に固定） -->
+        <path d="M44 96 C28 92 18 102 22 114 C34 112 44 104 44 96 Z" fill="#8FBF7A"/>
+        <path d="M76 96 C92 92 102 102 98 114 C86 112 76 104 76 96 Z" fill="#79AD66"/>
+      </svg>
+      <div class="burst-layer" id="burstLayer"></div>
+    </div>
+
+    <div class="tap-me" id="tapMe">tap me</div>
+
+    <div class="result" id="resultArea">
+      <div class="result-cat" id="titleWord"></div>
+      <div class="result-quote" id="subtitleText"></div>
+    </div>
+    <div class="again-note" id="againNote">今日はもう一度タップしても同じだよ</div>
+  </div>
+</div>
+
+<script>
+  // 元気が出る言葉のリスト（カテゴリー別・100個）
+  const quotes = [
+    { cat:"HAPPY", emoji:"🌼", text:"今日の私は、なかなかイケてる。" },
+    { cat:"HAPPY", emoji:"🌼", text:"ごきげんな人は、だいたい強い。" },
+    { cat:"HAPPY", emoji:"🌼", text:"今日は好きなものから選ぼう。" },
+    { cat:"HAPPY", emoji:"🌼", text:"小さな幸せ、拾ったもん勝ち。" },
+    { cat:"HAPPY", emoji:"🌼", text:"ご褒美は、理由がなくてもいい。" },
+    { cat:"HAPPY", emoji:"🌼", text:"「なんか嬉しい」を大切に。" },
+    { cat:"HAPPY", emoji:"🌼", text:"今日くらい、ちょっと浮かれてよし。" },
+    { cat:"HAPPY", emoji:"🌼", text:"笑えたら、もう半分勝ってる。" },
+    { cat:"HAPPY", emoji:"🌼", text:"楽しい予定を、ひとつ仕込もう。" },
+    { cat:"HAPPY", emoji:"🌼", text:"今日の幸せ、先取りしちゃおう。" },
+    { cat:"COOL", emoji:"🕶️", text:"全員に好かれるなんて、無理ゲーです。" },
+    { cat:"COOL", emoji:"🕶️", text:"人の機嫌まで、担当しなくてよし。" },
+    { cat:"COOL", emoji:"🕶️", text:"嫌われたって、意外と生きていける。" },
+    { cat:"COOL", emoji:"🕶️", text:"「どう思われる？」は、本日定休日。" },
+    { cat:"COOL", emoji:"🕶️", text:"他人の正解、持ち帰らなくていい。" },
+    { cat:"COOL", emoji:"🕶️", text:"比べるなら、昨日の自分だけで十分。" },
+    { cat:"COOL", emoji:"🕶️", text:"噂話より、自分の人生を楽しもう。" },
+    { cat:"COOL", emoji:"🕶️", text:"「まあ、知らんけど」で流す日も必要。" },
+    { cat:"COOL", emoji:"🕶️", text:"その悩み、明日の自分に渡してしまえ。" },
+    { cat:"COOL", emoji:"🕶️", text:"人生、そんなに真面目にやらなくても大丈夫。" },
+    { cat:"RELAX", emoji:"☕", text:"頑張る前に、とりあえずお茶。" },
+    { cat:"RELAX", emoji:"☕", text:"何もしない。という立派な予定。" },
+    { cat:"RELAX", emoji:"☕", text:"やる気は、来るまで待ってよし。" },
+    { cat:"RELAX", emoji:"☕", text:"疲れたら休む。それ、普通です。" },
+    { cat:"RELAX", emoji:"☕", text:"今日できること？明日の自分に任せる。" },
+    { cat:"RELAX", emoji:"☕", text:"ちゃんと休めたら、それだけで優勝。" },
+    { cat:"RELAX", emoji:"☕", text:"今日は省エネモードで営業中。" },
+    { cat:"RELAX", emoji:"☕", text:"心が疲れたら、予定をひとつ減らそう。" },
+    { cat:"RELAX", emoji:"☕", text:"何もしたくない日も、ちゃんと生きてる。" },
+    { cat:"RELAX", emoji:"☕", text:"「まあいっか」は、大人の必殺技。" },
+    { cat:"BRAVE", emoji:"🔥", text:"「今さら？」じゃない。「今から」です。" },
+    { cat:"BRAVE", emoji:"🔥", text:"やってみたいなら、やってみよう。話はそれから。" },
+    { cat:"BRAVE", emoji:"🔥", text:"失敗したら、経験値が増えるだけ。" },
+    { cat:"BRAVE", emoji:"🔥", text:"迷ったら、ちょっとワクワクするほうへ。" },
+    { cat:"BRAVE", emoji:"🔥", text:"「私には無理」を、今日は保留。" },
+    { cat:"BRAVE", emoji:"🔥", text:"小さな一歩でも、前進は前進。" },
+    { cat:"BRAVE", emoji:"🔥", text:"やらない理由、今日はひとつ減らそう。" },
+    { cat:"BRAVE", emoji:"🔥", text:"新しいこと、始めるのに許可はいりません。" },
+    { cat:"BRAVE", emoji:"🔥", text:"未来の自分に「やってみてよ」と言われてるかも。" },
+    { cat:"BRAVE", emoji:"🔥", text:"人生後半戦、ここからが面白い。" },
+    { cat:"LOVE", emoji:"💕", text:"今日は自分を最優先。たまにはね。" },
+    { cat:"LOVE", emoji:"💕", text:"自分へのダメ出し、本日は受付終了。" },
+    { cat:"LOVE", emoji:"💕", text:"自分の味方くらい、自分でいてあげよう。" },
+    { cat:"LOVE", emoji:"💕", text:"「私なんて」を、今日は禁句にします。" },
+    { cat:"LOVE", emoji:"💕", text:"鏡を見て、まず「今日もお疲れ」。" },
+    { cat:"LOVE", emoji:"💕", text:"自分を雑に扱わない。それだけで十分。" },
+    { cat:"LOVE", emoji:"💕", text:"好きなものを選ぶ私は、わりと正しい。" },
+    { cat:"LOVE", emoji:"💕", text:"人には優しく。自分にはもっと優しく。" },
+    { cat:"LOVE", emoji:"💕", text:"自分を大切にするのに、理由なんていらない。" },
+    { cat:"LOVE", emoji:"💕", text:"今日の私も、ちゃんと愛される価値あり。" },
+    { cat:"SMILE", emoji:"😆", text:"家事は逃げない。たぶん。" },
+    { cat:"SMILE", emoji:"😆", text:"部屋が散らかってても、人生は散らかってない。" },
+    { cat:"SMILE", emoji:"😆", text:"やる気がない？今日は定休日です。" },
+    { cat:"SMILE", emoji:"😆", text:"イライラしたら、まず糖分。" },
+    { cat:"SMILE", emoji:"😆", text:"悩みすぎたら、とりあえず寝る。かなり大事。" },
+    { cat:"SMILE", emoji:"😆", text:"お腹が空いてるときの決断は、だいたい怪しい。" },
+    { cat:"SMILE", emoji:"😆", text:"「ちゃんとしなきゃ」を、今日は一旦しまっておこう。" },
+    { cat:"SMILE", emoji:"😆", text:"今日の目標？機嫌よく生きる。" },
+    { cat:"SMILE", emoji:"😆", text:"面倒くさい？はい、私もです。" },
+    { cat:"SMILE", emoji:"😆", text:"まあまあ。人生、予定通りにはいきませんって。" },
+    { cat:"FREE", emoji:"🪽", text:"いい人、今日はお休みします。" },
+    { cat:"FREE", emoji:"🪽", text:"「NO」が言えたら、ちょっと成長。" },
+    { cat:"FREE", emoji:"🪽", text:"全部引き受けなくていい。宅配便じゃないんだから。" },
+    { cat:"FREE", emoji:"🪽", text:"誰かの期待に応える係、今日は休業。" },
+    { cat:"FREE", emoji:"🪽", text:"「こうするべき」を、一個手放そう。" },
+    { cat:"FREE", emoji:"🪽", text:"我慢大会、そろそろ閉幕です。" },
+    { cat:"FREE", emoji:"🪽", text:"やりたくないことを、やらない勇気。" },
+    { cat:"FREE", emoji:"🪽", text:"人生のハンドル、自分で握ろう。" },
+    { cat:"FREE", emoji:"🪽", text:"誰かの人生を生きるほど、暇じゃない。" },
+    { cat:"FREE", emoji:"🪽", text:"好きなほうへ行こう。大人なんだから。" },
+    { cat:"LUCKY", emoji:"✨", text:"今日は、ちょっとツイてる気がする。" },
+    { cat:"LUCKY", emoji:"✨", text:"良いことは、意外とひっそりやってくる。" },
+    { cat:"LUCKY", emoji:"✨", text:"「なんとかなる」は、けっこう当たる。" },
+    { cat:"LUCKY", emoji:"✨", text:"今日は偶然を味方につけよう。" },
+    { cat:"LUCKY", emoji:"✨", text:"思いがけないラッキー、拾えるかも。" },
+    { cat:"LUCKY", emoji:"✨", text:"いいことが起きる余白、つくっておこう。" },
+    { cat:"LUCKY", emoji:"✨", text:"笑っていたら、いいことを見つけやすい。" },
+    { cat:"LUCKY", emoji:"✨", text:"今日の運勢？自分で上げちゃえばいい。" },
+    { cat:"LUCKY", emoji:"✨", text:"「なんかいい日」くらいが、ちょうどいい。" },
+    { cat:"LUCKY", emoji:"✨", text:"とりあえず今日は、大丈夫そう。" },
+    { cat:"GROW", emoji:"🌱", text:"年齢は、経験値。ちゃんとレベル上がってます。" },
+    { cat:"GROW", emoji:"🌱", text:"今さらじゃない。むしろ今だから。" },
+    { cat:"GROW", emoji:"🌱", text:"大人になってからのほうが、人生は自由。" },
+    { cat:"GROW", emoji:"🌱", text:"若さだけが武器じゃない。経験もなかなか強い。" },
+    { cat:"GROW", emoji:"🌱", text:"「知らない」を楽しめる人は、まだまだ伸びる。" },
+    { cat:"GROW", emoji:"🌱", text:"昔の私にはできなかったこと、今ならできるかも。" },
+    { cat:"GROW", emoji:"🌱", text:"これまでの失敗、全部ネタにしてしまえ。" },
+    { cat:"GROW", emoji:"🌱", text:"まだ完成してません。絶賛成長中。" },
+    { cat:"GROW", emoji:"🌱", text:"人生、まだまだ伏線回収中。" },
+    { cat:"GROW", emoji:"🌱", text:"これからの私、ちょっと楽しみじゃない？" },
+    { cat:"RESET", emoji:"🌙", text:"今日うまくいかなかった？明日リベンジ。" },
+    { cat:"RESET", emoji:"🌙", text:"失敗？はい、経験値いただきました。" },
+    { cat:"RESET", emoji:"🌙", text:"反省はほどほどに。自分いじめは禁止。" },
+    { cat:"RESET", emoji:"🌙", text:"今日の嫌なこと、寝る前に置いていこう。" },
+    { cat:"RESET", emoji:"🌙", text:"できなかったことより、今日やったことを数えよう。" },
+    { cat:"RESET", emoji:"🌙", text:"今日はここまで。よくやりました。" },
+    { cat:"RESET", emoji:"🌙", text:"気持ちが落ちたら、また上がればいい。" },
+    { cat:"RESET", emoji:"🌙", text:"人生、やり直しボタンは何回押してもいい。" },
+    { cat:"RESET", emoji:"🌙", text:"明日の私に、バトンタッチ。" },
+    { cat:"RESET", emoji:"🌙", text:"大丈夫。人生、意外となんとかなる。" },
+  ];
+
+  function seedFromDate(dateStr){
+    let hash = 0;
+    for(let i=0;i<dateStr.length;i++){
+      hash = (hash * 31 + dateStr.charCodeAt(i)) >>> 0;
+    }
+    return hash;
+  }
+
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+  const seed = seedFromDate(dateStr);
+  const picked = quotes[seed % quotes.length];
+
+  const peachBtn = document.getElementById('peachBtn');
+  const titleWord = document.getElementById('titleWord');
+  const subtitleText = document.getElementById('subtitleText');
+  const tapMe = document.getElementById('tapMe');
+  const againNote = document.getElementById('againNote');
+
+  const resultArea = document.getElementById('resultArea');
+
+  const confettiColors = ['#FF8FAE','#FFCA4A','#7FDBC4','#B79CF0','#3FC6C2','#FF6B95'];
+
+  function burstConfetti(){
+    const layer = document.getElementById('burstLayer');
+    layer.innerHTML = '';
+    const count = 22;
+    for(let i=0;i<count;i++){
+      const piece = document.createElement('div');
+      const isStar = Math.random() < 0.4;
+      piece.className = 'confetti-piece ' + (isStar ? 'star' : 'ribbon');
+      piece.style.background = confettiColors[i % confettiColors.length];
+
+      // クラッカーみたいに上＆左右に打ち上がるように角度を調整
+      const angle = (-90 + (Math.random()*140 - 70)) * Math.PI/180;
+      const dist = 60 + Math.random()*70;
+      const x = Math.cos(angle) * dist;
+      const y = Math.sin(angle) * dist;
+      const rot = Math.random()*360;
+
+      layer.appendChild(piece);
+
+      piece.animate(
+        [
+          { transform:'translate(-50%,-50%) translate(0,0) rotate(0deg) scale(0.6)', opacity:1 },
+          { transform:`translate(-50%,-50%) translate(${x*0.6}px, ${y*0.6}px) rotate(${rot}deg) scale(1)`, opacity:1, offset:0.5 },
+          { transform:`translate(-50%,-50%) translate(${x}px, ${y + 40}px) rotate(${rot*1.4}deg) scale(0.8)`, opacity:0 }
+        ],
+        { duration: 900 + Math.random()*400, easing:'cubic-bezier(.2,.8,.3,1)', fill:'forwards' }
+      );
+    }
+  }
+
+  function reveal(){
+    titleWord.textContent = `${picked.emoji} ${picked.cat}`;
+    subtitleText.textContent = picked.text;
+    resultArea.classList.add('show');
+    peachBtn.classList.add('split');
+    peachBtn.classList.remove('peach-bounce');
+    tapMe.classList.add('hide');
+    againNote.classList.add('show');
+    burstConfetti();
+  }
+
+  peachBtn.addEventListener('click', reveal);
+</script>
+
+</body>
+</html>
