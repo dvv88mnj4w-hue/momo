@@ -990,7 +990,7 @@
     ctx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
     const paddingL = parseFloat(style.paddingLeft) || 0;
     const paddingR = parseFloat(style.paddingRight) || 0;
-    const maxWidth = el.clientWidth - paddingL - paddingR;
+    const maxWidth = el.clientWidth - paddingL - paddingR - 14;
 
     if(!maxWidth || ctx.measureText(text).width <= maxWidth) return text;
 
@@ -1104,13 +1104,21 @@
     countEl.textContent = `全部で ${n}個`;
     pile.innerHTML = '';
 
+    // 表示順は上(1個)→下(5個)だが、積み上がる順番は下の段からにする
+    const rowCounts = new Array(PYRAMID_ROWS.length).fill(0);
     let remaining = n;
+    for(let r = PYRAMID_ROWS.length - 1; r >= 0 && remaining > 0; r--){
+      const cap = PYRAMID_ROWS[r];
+      const fillCount = Math.min(cap, remaining);
+      rowCounts[r] = fillCount;
+      remaining -= fillCount;
+    }
+
     let globalIndex = 0;
-    PYRAMID_ROWS.forEach(function(cap){
+    PYRAMID_ROWS.forEach(function(cap, r){
       const row = document.createElement('div');
       row.className = 'pile-row';
-      const fillCount = Math.max(0, Math.min(cap, remaining));
-      for(let i=0;i<fillCount;i++){
+      for(let i=0;i<rowCounts[r];i++){
         const span = document.createElement('span');
         span.innerHTML = MINI_PEACH_SVG;
         span.classList.add('fall-in');
@@ -1118,7 +1126,6 @@
         row.appendChild(span);
         globalIndex++;
       }
-      remaining -= fillCount;
       pile.appendChild(row);
     });
 
