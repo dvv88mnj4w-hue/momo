@@ -241,6 +241,24 @@
     z-index:10;
   }
 
+  .sound-toggle{
+    position:fixed;
+    top:22px;
+    left:22px;
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:#fff;
+    border:1.5px solid var(--teal);
+    font-size:15px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:10;
+  }
+
   .rays{
     display:inline-flex;
     align-items:center;
@@ -445,11 +463,117 @@
     color:var(--teal);
     opacity:0.85;
   }
+
+  /* ---- かご（たまった桃）シーン ---- */
+  .basket-panel{
+    display:none;
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  .basket-panel.show{
+    display:flex;
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .basket-count{
+    font-family:'Mochiy Pop One', sans-serif;
+    font-size:20px;
+    color:var(--teal);
+  }
+
+  .basket-stage{
+    position:relative;
+    width:290px;
+    height:270px;
+    cursor:pointer;
+  }
+
+  .peach-pile{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:180px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    align-items:center;
+    gap:5px;
+    z-index:2;
+    cursor:pointer;
+  }
+  .pile-row{
+    display:flex;
+    justify-content:center;
+    gap:5px;
+  }
+  .peach-pile span{
+    width:40px;
+    height:40px;
+    display:inline-block;
+  }
+  .mini-peach-svg{ width:100%; height:100%; overflow:visible; }
+
+  @keyframes peachFall{
+    0%{ transform:translateY(-60px); opacity:0; }
+    60%{ transform:translateY(6px); opacity:1; }
+    100%{ transform:translateY(0); opacity:1; }
+  }
+  .peach-pile span.fall-in{
+    animation:peachFall .5s ease-out both;
+  }
+
+  .peach-pile.pop{
+    animation:basketPop .4s ease;
+  }
+  @keyframes basketPop{
+    0%{ transform:scale(1); }
+    40%{ transform:scale(1.12) rotate(-2deg); }
+    100%{ transform:scale(1); }
+  }
+
+  .basket-svg{
+    position:absolute;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:270px;
+    height:145px;
+    z-index:1;
+  }
+
+  .congrats{
+    font-family:'Mochiy Pop One', sans-serif;
+    font-size:22px;
+    color:#fff;
+    background:linear-gradient(135deg, #FFCA4A, #FF8FAE);
+    border-radius:16px;
+    padding:12px 22px;
+    letter-spacing:0.03em;
+    display:none;
+    text-align:center;
+  }
+  .congrats.show{
+    display:block;
+    animation:congratsPop .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes congratsPop{
+    0%{ transform:scale(0.5); opacity:0; }
+    70%{ transform:scale(1.08); opacity:1; }
+    100%{ transform:scale(1); opacity:1; }
+  }
 </style>
 </head>
 <body>
 
 <div class="frame" id="frame">
+
+  <!-- BGMと効果音（ファイルはアップロードして使う） -->
+  <audio id="bgmAudio" src="bgm.mp3" loop preload="auto"></audio>
+  <audio id="popSound" src="pop.mp3" preload="auto"></audio>
+  <button class="sound-toggle" id="soundToggle">🔊</button>
 
   <!-- トップ画面 -->
   <div class="panel" id="topPanel">
@@ -512,6 +636,36 @@
       </svg>
     </div>
 
+  </div>
+
+  <!-- かご（たまった桃）シーン -->
+  <div class="panel basket-panel" id="basketPanel">
+    <div class="r-header rays">たまったMOMO</div>
+    <div class="basket-count" id="basketCount"></div>
+
+    <div class="basket-stage" id="basketStage">
+      <div class="peach-pile" id="peachPile">
+        <div class="pile-row" data-cap="1"></div>
+        <div class="pile-row" data-cap="2"></div>
+        <div class="pile-row" data-cap="3"></div>
+        <div class="pile-row" data-cap="4"></div>
+        <div class="pile-row" data-cap="5"></div>
+      </div>
+      <div class="burst-layer" id="basketBurstLayer"></div>
+      <svg class="basket-svg" viewBox="0 0 260 140" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="35" cy="58" rx="19" ry="28" fill="none" stroke="#B9824A" stroke-width="9" transform="rotate(-18 35 58)"/>
+        <ellipse cx="225" cy="58" rx="19" ry="28" fill="none" stroke="#B9824A" stroke-width="9" transform="rotate(18 225 58)"/>
+        <path d="M35 58 C35 100 225 100 225 58 L205 120 C205 120 130 128 130 128 C130 128 55 120 55 120 Z" fill="#E8B478"/>
+        <ellipse cx="130" cy="58" rx="95" ry="20" fill="#D9A066"/>
+        <path d="M45 72 Q130 92 215 72" stroke="#C98F55" stroke-width="3" fill="none" opacity="0.6"/>
+        <path d="M50 92 Q130 110 210 92" stroke="#C98F55" stroke-width="3" fill="none" opacity="0.55"/>
+        <path d="M60 110 Q130 124 200 110" stroke="#C98F55" stroke-width="3" fill="none" opacity="0.5"/>
+      </svg>
+    </div>
+
+    <div class="congrats" id="congratsBanner">CONGRATULATIONS!</div>
+
+    <button class="bonus-link" id="nextToRiverBtn" style="display:inline-block;">次へ ▶</button>
   </div>
 
   <!-- おまけページ（桃が川を流れてくる） -->
@@ -676,6 +830,26 @@
   const weekdaysEn = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
   document.getElementById('dateTag').textContent =
     `${today.getMonth()+1}月${today.getDate()}日(${weekdays[today.getDay()]})`;
+
+  // ---- 累計で開いた日数をこの端末に記録（かご用。連続が途切れても減らない） ----
+  function updateTotalDays(){
+    try{
+      const todayKey = dateStr;
+      let total = parseInt(localStorage.getItem('momo_totalDays') || '0', 10);
+      const lastDate = localStorage.getItem('momo_totalLastDate');
+
+      if(lastDate !== todayKey){
+        total += 1;
+        localStorage.setItem('momo_totalLastDate', todayKey);
+        localStorage.setItem('momo_totalDays', String(total));
+      }
+      return total;
+    } catch(e){
+      return null;
+    }
+  }
+  const totalDays = updateTotalDays();
+
   const seed = seedFromDate(dateStr);
   const picked = quotes[seed % quotes.length];
 
@@ -699,10 +873,39 @@
   const resultPanel = document.getElementById('resultPanel');
   const closeBtn = document.getElementById('closeBtn');
 
+  // ---- BGM・効果音 ----
+  const bgmAudio = document.getElementById('bgmAudio');
+  const popSound = document.getElementById('popSound');
+  const soundToggle = document.getElementById('soundToggle');
+  let soundOn = true;
+  let bgmStarted = false;
+
+  function startBgmOnce(){
+    if(bgmStarted) return;
+    bgmStarted = true;
+    bgmAudio.volume = 0.5;
+    bgmAudio.play().catch(function(){ /* 再生できない環境は無視 */ });
+  }
+  document.body.addEventListener('click', startBgmOnce, { once:true });
+
+  soundToggle.addEventListener('click', function(){
+    soundOn = !soundOn;
+    soundToggle.textContent = soundOn ? '🔊' : '🔈';
+    bgmAudio.muted = !soundOn;
+    popSound.muted = !soundOn;
+  });
+
+  function playPop(){
+    try{
+      popSound.currentTime = 0;
+      popSound.play().catch(function(){});
+    } catch(e){}
+  }
+
   const confettiColors = ['#FF8FAE','#FFCA4A','#7FDBC4','#B79CF0','#3FC6C2','#FF6B95'];
 
-  function burstConfetti(){
-    const layer = document.getElementById('burstLayer');
+  function burstConfetti(layerId){
+    const layer = document.getElementById(layerId || 'burstLayer');
     layer.innerHTML = '';
     const count = 22;
     const surpriseIndex = Math.floor(Math.random() * count); // この1個だけキャラクターにする
@@ -756,6 +959,7 @@
     peachBtn.classList.add('split');
     peachBtn.classList.remove('peach-bounce');
     tapMe.classList.add('hide');
+    playPop();
     burstConfetti();
 
     // 桃が割れる演出を少し見せてから、結果ページへ切り替え
@@ -764,17 +968,18 @@
       topPanel.style.display = 'none';
       resultPanel.classList.add('show');
 
-      // メッセージをしばらく見せたら、ひみつのエンディング（おまけ）へ自動で切り替え
+      // メッセージをしばらく見せたら、かごの画面へ切り替え（次はボタンで進む）
       setTimeout(function(){
         resultPanel.classList.remove('show');
-        bonusPanel.classList.add('show');
-        frame.classList.add('no-pattern');
+        fillBasket();
+        basketPanel.classList.add('show');
       }, 4500);
     }, 850);
   }
 
   function closeResult(){
     bonusPanel.classList.remove('show');
+    basketPanel.classList.remove('show');
     resultPanel.classList.remove('show');
     topPanel.style.display = 'flex';
     peachBtn.classList.remove('split');
@@ -787,6 +992,76 @@
   // ---- ひみつのエンディング（川を流れる桃） ----
   const frame = document.getElementById('frame');
   const bonusPanel = document.getElementById('bonusPanel');
+  const basketPanel = document.getElementById('basketPanel');
+
+  const PYRAMID_ROWS = [1, 2, 3, 4, 5]; // 上から順（合計15個でいっぱい）
+  const MINI_PEACH_SVG = `
+    <svg viewBox="0 0 120 130" class="mini-peach-svg">
+      <path d="M60 30 C34 18 10 40 12 66 C14 92 36 108 60 100 Z" fill="#FFC8B0"/>
+      <path d="M60 30 C42 24 24 36 20 54 C34 50 50 42 60 30 Z" fill="#FF9FA8" opacity="0.55"/>
+      <path d="M60 30 C86 18 110 40 108 66 C106 92 84 108 60 100 Z" fill="#FFB6A8"/>
+      <path d="M60 30 C78 24 96 36 100 54 C86 50 70 42 60 30 Z" fill="#FF8F9E" opacity="0.5"/>
+      <path d="M44 96 C28 92 18 102 22 114 C34 112 44 104 44 96 Z" fill="#8FBF7A"/>
+      <path d="M76 96 C92 92 102 102 98 114 C86 112 76 104 76 96 Z" fill="#79AD66"/>
+    </svg>`;
+
+  const PYRAMID_TOTAL = 15;
+
+  function fillBasket(){
+    const pile = document.getElementById('peachPile');
+    const countEl = document.getElementById('basketCount');
+    const congratsEl = document.getElementById('congratsBanner');
+    const raw = totalDays || 1;
+
+    // 15個を1セットとして、いっぱいになったらまた1個からスタート
+    const n = ((raw - 1) % PYRAMID_TOTAL) + 1;
+
+    countEl.textContent = `全部で ${n}個`;
+    pile.innerHTML = '';
+
+    let remaining = n;
+    let globalIndex = 0;
+    PYRAMID_ROWS.forEach(function(cap){
+      const row = document.createElement('div');
+      row.className = 'pile-row';
+      const fillCount = Math.max(0, Math.min(cap, remaining));
+      for(let i=0;i<fillCount;i++){
+        const span = document.createElement('span');
+        span.innerHTML = MINI_PEACH_SVG;
+        span.classList.add('fall-in');
+        span.style.animationDelay = (globalIndex * 0.06) + 's';
+        row.appendChild(span);
+        globalIndex++;
+      }
+      remaining -= fillCount;
+      pile.appendChild(row);
+    });
+
+    if(n >= PYRAMID_TOTAL){
+      congratsEl.classList.add('show');
+    } else {
+      congratsEl.classList.remove('show');
+    }
+  }
+
+  // かごの桃は何度でもタップして遊べる（紙吹雪＋キャラクターのサプライズ）
+  function basketPopFun(){
+    const pile = document.getElementById('peachPile');
+    pile.classList.remove('pop');
+    void pile.offsetWidth; // アニメーションを毎回リセットするおまじない
+    pile.classList.add('pop');
+    playPop();
+    burstConfetti('basketBurstLayer');
+  }
+  const basketStage = document.getElementById('basketStage');
+  basketStage.addEventListener('click', basketPopFun);
+
+  document.getElementById('nextToRiverBtn').addEventListener('click', function(){
+    basketPanel.classList.remove('show');
+    bonusPanel.classList.add('show');
+    frame.classList.add('no-pattern');
+  });
+
   const floatingPeach = document.getElementById('floatingPeach');
   const speechBubble = document.getElementById('speechBubble');
   const speechText = document.getElementById('speechText');
@@ -818,6 +1093,7 @@
     if(floatingPeach.classList.contains('split')) return; // 割れてる間は連打しない
     floatingPeach.style.animationPlayState = 'paused';
     floatingPeach.classList.add('split');
+    playPop();
 
     setTimeout(function(){
       const praise = praises[Math.floor(Math.random()*praises.length)];
