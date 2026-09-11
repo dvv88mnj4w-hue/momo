@@ -245,12 +245,13 @@
     position:fixed;
     top:22px;
     left:22px;
-    width:36px;
-    height:36px;
+    width:40px;
+    height:40px;
     border-radius:50%;
-    background:#fff;
-    border:1.5px solid var(--teal);
-    font-size:15px;
+    background:linear-gradient(135deg, var(--pink), var(--teal));
+    border:none;
+    box-shadow:0 6px 14px -6px rgba(255,111,149,0.5);
+    font-size:17px;
     line-height:1;
     display:flex;
     align-items:center;
@@ -315,11 +316,13 @@
   .r-quote{
     font-family:'Zen Maru Gothic', sans-serif;
     font-weight:900;
-    font-size:36px;
+    font-size:25px;
     line-height:1.5;
     color:var(--ink);
     white-space:pre-line;
     padding:0 6px;
+    width:100%;
+    box-sizing:border-box;
   }
 
   .r-underline{
@@ -397,28 +400,53 @@
   .river{ top:70px; }
   .river2{ top:120px; opacity:0.4; }
 
-  .floating-peach{
+  .river-item{
     position:absolute;
-    top:78px;
-    left:-70px;
-    width:64px;
-    height:64px;
+    width:56px;
+    height:56px;
     cursor:pointer;
-    animation:drift 7s linear infinite;
+    z-index:3;
   }
-  .floating-peach svg{ width:100%; height:100%; overflow:visible; }
-  @keyframes drift{
-    0%{ left:-70px; transform:rotate(-6deg); }
-    50%{ transform:rotate(6deg); }
-    100%{ left:calc(100% + 20px); transform:rotate(-6deg); }
-  }
+  .river-item svg, .river-item img{ width:100%; height:100%; overflow:visible; object-fit:contain; }
 
   .fp-left, .fp-right{
     transition:transform .5s cubic-bezier(.34,1.56,.64,1);
     transform-origin:60px 60px;
   }
-  .floating-peach.split .fp-left{ transform:translate(-16px,2px) rotate(-10deg); }
-  .floating-peach.split .fp-right{ transform:translate(16px,2px) rotate(10deg); }
+  .river-item.split .fp-left{ transform:translate(-16px,2px) rotate(-10deg); }
+  .river-item.split .fp-right{ transform:translate(16px,2px) rotate(10deg); }
+
+  .pop-mark{
+    position:absolute;
+    width:26px;
+    height:26px;
+    z-index:5;
+    pointer-events:none;
+    animation:popMarkFloat 1s ease-out forwards;
+  }
+  .pop-mark svg{ width:100%; height:100%; }
+  @keyframes popMarkFloat{
+    0%{ transform:translate(-50%,-50%) translateY(0) scale(0.5); opacity:0; }
+    30%{ transform:translate(-50%,-50%) translateY(-10px) scale(1.15); opacity:1; }
+    100%{ transform:translate(-50%,-50%) translateY(-38px) scale(1); opacity:0; }
+  }
+
+  .ending-tagline{
+    text-align:center;
+  }
+  .ending-tagline .rays{
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:var(--teal);
+  }
+  .ending-sub{
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:var(--teal);
+    margin-top:2px;
+  }
 
   .speech-bubble{
     position:absolute;
@@ -573,7 +601,17 @@
   <!-- BGMと効果音（ファイルはアップロードして使う） -->
   <audio id="bgmAudio" src="bgm.mp3" loop preload="auto"></audio>
   <audio id="popSound" src="pop.mp3" preload="auto"></audio>
-  <button class="sound-toggle" id="soundToggle">🔊</button>
+  <button class="sound-toggle" id="soundToggle">
+    <svg id="soundIconOn" viewBox="0 0 24 24" width="18" height="18">
+      <path d="M4 9v6h4l5 4V5L8 9H4z" fill="#fff"/>
+      <path d="M16 8.5c1.2 1 1.2 6 0 7" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <path d="M18.5 6.5c2.2 2 2.2 9 0 11" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </svg>
+    <svg id="soundIconOff" viewBox="0 0 24 24" width="18" height="18" style="display:none;">
+      <path d="M4 9v6h4l5 4V5L8 9H4z" fill="#fff"/>
+      <path d="M16 9l5 6M21 9l-5 6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
 
   <!-- トップ画面 -->
   <div class="panel" id="topPanel">
@@ -668,34 +706,20 @@
     <button class="bonus-link" id="nextToRiverBtn" style="display:inline-block;">次へ ▶</button>
   </div>
 
-  <!-- おまけページ（桃が川を流れてくる） -->
+  <!-- おまけページ（桃とキャラクターが川を流れてくる） -->
   <div class="panel bonus-panel" id="bonusPanel">
     <button class="close-btn" id="closeBtn">×</button>
 
     <div class="river-wrap" id="riverWrap">
       <div class="river"></div>
       <div class="river river2"></div>
-
-      <div class="floating-peach" id="floatingPeach">
-        <svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg">
-          <g class="fp-left">
-            <path d="M60 30 C34 18 10 40 12 66 C14 92 36 108 60 100 Z" fill="#FFC8B0"/>
-            <path d="M60 30 C42 24 24 36 20 54 C34 50 50 42 60 30 Z" fill="#FF9FA8" opacity="0.55"/>
-            <circle cx="30" cy="52" r="4" fill="#FFFFFF" opacity="0.7"/>
-          </g>
-          <g class="fp-right">
-            <path d="M60 30 C86 18 110 40 108 66 C106 92 84 108 60 100 Z" fill="#FFB6A8"/>
-            <path d="M60 30 C78 24 96 36 100 54 C86 50 70 42 60 30 Z" fill="#FF8F9E" opacity="0.5"/>
-            <circle cx="92" cy="46" r="3" fill="#FFFFFF" opacity="0.6"/>
-          </g>
-          <path d="M44 96 C28 92 18 102 22 114 C34 112 44 104 44 96 Z" fill="#8FBF7A"/>
-          <path d="M76 96 C92 92 102 102 98 114 C86 112 76 104 76 96 Z" fill="#79AD66"/>
-        </svg>
-      </div>
-
       <div class="speech-bubble" id="speechBubble"><span id="speechText"></span></div>
     </div>
 
+    <div class="ending-tagline">
+      <div class="rays">今日mo明日mo</div>
+      <div class="ending-sub">have a nice day.</div>
+    </div>
   </div>
 
 </div>
@@ -884,21 +908,33 @@
     if(bgmStarted) return;
     bgmStarted = true;
     bgmAudio.volume = 0.5;
-    bgmAudio.play().catch(function(){ /* 再生できない環境は無視 */ });
+    bgmAudio.play().catch(function(){ bgmStarted = false; /* 失敗したら次のタップでまた試す */ });
   }
-  document.body.addEventListener('click', startBgmOnce, { once:true });
+  document.body.addEventListener('click', startBgmOnce);
+  document.body.addEventListener('touchend', startBgmOnce);
 
-  soundToggle.addEventListener('click', function(){
+  soundToggle.addEventListener('click', function(e){
+    e.stopPropagation();
+    startBgmOnce();
     soundOn = !soundOn;
-    soundToggle.textContent = soundOn ? '🔊' : '🔈';
+    document.getElementById('soundIconOn').style.display = soundOn ? 'block' : 'none';
+    document.getElementById('soundIconOff').style.display = soundOn ? 'none' : 'block';
     bgmAudio.muted = !soundOn;
     popSound.muted = !soundOn;
   });
 
   function playPop(){
     try{
+      // 効果音が聞こえやすいように、鳴っている間だけBGMを少し下げる
+      const normalVolume = 0.5;
+      bgmAudio.volume = 0.08;
       popSound.currentTime = 0;
+      popSound.volume = 1.0;
       popSound.play().catch(function(){});
+      clearTimeout(playPop._restoreTimer);
+      playPop._restoreTimer = setTimeout(function(){
+        bgmAudio.volume = normalVolume;
+      }, 1000);
     } catch(e){}
   }
 
@@ -946,16 +982,65 @@
     }
   }
 
+  // 表示幅を測って、できるだけ句読点の位置で綺麗に改行する
+  function smartWrapQuote(text, el){
+    const style = getComputedStyle(el);
+    const canvas = smartWrapQuote._canvas || (smartWrapQuote._canvas = document.createElement('canvas'));
+    const ctx = canvas.getContext('2d');
+    ctx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const paddingL = parseFloat(style.paddingLeft) || 0;
+    const paddingR = parseFloat(style.paddingRight) || 0;
+    const maxWidth = el.clientWidth - paddingL - paddingR;
+
+    if(!maxWidth || ctx.measureText(text).width <= maxWidth) return text;
+
+    // 、や。の直後を改行候補にする（最後の文字は除く）
+    const candidates = [];
+    for(let i=0;i<text.length-1;i++){
+      if(text[i] === '、' || text[i] === '。') candidates.push(i+1);
+    }
+
+    let best = null, bestScore = Infinity;
+    candidates.forEach(function(idx){
+      const a = text.slice(0, idx);
+      const b = text.slice(idx);
+      if(ctx.measureText(a).width <= maxWidth && ctx.measureText(b).width <= maxWidth){
+        const score = Math.abs(a.length - b.length);
+        if(score < bestScore){ bestScore = score; best = idx; }
+      }
+    });
+
+    if(best !== null){
+      return text.slice(0, best) + '\n' + text.slice(best);
+    }
+
+    // 句読点でうまく収まらない場合は、幅ぴったりで機械的に折り返す
+    let lines = [];
+    let current = '';
+    for(const ch of text){
+      const test = current + ch;
+      if(ctx.measureText(test).width > maxWidth && current){
+        lines.push(current);
+        current = ch;
+      } else {
+        current = test;
+      }
+    }
+    if(current) lines.push(current);
+    return lines.join('\n');
+  }
+
   function fillResultPanel(){
     document.getElementById('rDateBig').textContent = `${today.getMonth()+1}月${today.getDate()}日`;
     document.getElementById('rYear').textContent = `${today.getFullYear()}`;
     document.getElementById('rWeekday').textContent = weekdaysEn[today.getDay()];
     document.getElementById('rCatPill').textContent = picked.cat;
-    // 句読点（、）のところで改行する
-    document.getElementById('rQuote').textContent = picked.text.replace(/、/g, '、\n');
+    const quoteEl = document.getElementById('rQuote');
+    quoteEl.textContent = smartWrapQuote(picked.text, quoteEl);
   }
 
   function reveal(){
+    startBgmOnce();
     peachBtn.classList.add('split');
     peachBtn.classList.remove('peach-bounce');
     tapMe.classList.add('hide');
@@ -964,9 +1049,9 @@
 
     // 桃が割れる演出を少し見せてから、結果ページへ切り替え
     setTimeout(function(){
-      fillResultPanel();
       topPanel.style.display = 'none';
       resultPanel.classList.add('show');
+      fillResultPanel(); // 表示された後に、実際の幅を測って改行位置を決める
 
       // メッセージをしばらく見せたら、かごの画面へ切り替え（次はボタンで進む）
       setTimeout(function(){
@@ -986,7 +1071,7 @@
     peachBtn.classList.add('peach-bounce');
     tapMe.classList.remove('hide');
     frame.classList.remove('no-pattern');
-    resetBonus();
+    stopRiverScene();
   }
 
   // ---- ひみつのエンディング（川を流れる桃） ----
@@ -1060,11 +1145,13 @@
     basketPanel.classList.remove('show');
     bonusPanel.classList.add('show');
     frame.classList.add('no-pattern');
+    startRiverScene();
   });
 
-  const floatingPeach = document.getElementById('floatingPeach');
+  const riverWrap = document.getElementById('riverWrap');
   const speechBubble = document.getElementById('speechBubble');
   const speechText = document.getElementById('speechText');
+  let riverSpawnTimer = null;
 
   const praises = [
     "えらい!ちゃんとやってる!",
@@ -1089,26 +1176,122 @@
     "あなたなら、きっと大丈夫。"
   ];
 
-  function popPeach(){
-    if(floatingPeach.classList.contains('split')) return; // 割れてる間は連打しない
-    floatingPeach.style.animationPlayState = 'paused';
-    floatingPeach.classList.add('split');
+  const RIVER_PEACH_SVG = `
+    <svg viewBox="0 0 120 130">
+      <g class="fp-left">
+        <path d="M60 30 C34 18 10 40 12 66 C14 92 36 108 60 100 Z" fill="#FFC8B0"/>
+        <path d="M60 30 C42 24 24 36 20 54 C34 50 50 42 60 30 Z" fill="#FF9FA8" opacity="0.55"/>
+        <circle cx="30" cy="52" r="4" fill="#FFFFFF" opacity="0.7"/>
+      </g>
+      <g class="fp-right">
+        <path d="M60 30 C86 18 110 40 108 66 C106 92 84 108 60 100 Z" fill="#FFB6A8"/>
+        <path d="M60 30 C78 24 96 36 100 54 C86 50 70 42 60 30 Z" fill="#FF8F9E" opacity="0.5"/>
+        <circle cx="92" cy="46" r="3" fill="#FFFFFF" opacity="0.6"/>
+      </g>
+      <path d="M44 96 C28 92 18 102 22 114 C34 112 44 104 44 96 Z" fill="#8FBF7A"/>
+      <path d="M76 96 C92 92 102 102 98 114 C86 112 76 104 76 96 Z" fill="#79AD66"/>
+    </svg>`;
+
+  const POP_MARK_SVGS = [
+    '<svg viewBox="0 0 24 24"><path d="M12 20.5s-7.2-4.4-9.6-8.6C.7 8.6 3 5 6.6 5c1.9 0 3.5 1.2 5.4 3.8C13.9 6.2 15.5 5 17.4 5 21 5 23.3 8.6 21.6 11.9c-2.4 4.2-9.6 8.6-9.6 8.6z" fill="#FF8FAE"/></svg>',
+    '<svg viewBox="0 0 24 24"><path d="M12 1l2.9 7.1L22 9l-5.5 5 1.6 7.4L12 17.8 5.9 21.4 7.5 14 2 9l7.1-0.9z" fill="#FFCA4A"/></svg>',
+    '<svg viewBox="0 0 24 24"><path d="M12 2c.6 3.6 1.8 4.8 5.4 5.4-3.6.6-4.8 1.8-5.4 5.4-.6-3.6-1.8-4.8-5.4-5.4C10.2 6.8 11.4 5.6 12 2zM19 14c.3 1.8.9 2.4 2.7 2.7-1.8.3-2.4.9-2.7 2.7-.3-1.8-.9-2.4-2.7-2.7 1.8-.3 2.4-.9 2.7-2.7z" fill="#3FC6C2"/></svg>',
+    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#FF6B95"/><rect x="10.5" y="5" width="3" height="9" rx="1.5" fill="#fff"/><rect x="10.5" y="16" width="3" height="3" rx="1.5" fill="#fff"/></svg>'
+  ];
+
+  function getRiverItemPos(item){
+    const wrapRect = riverWrap.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+    return {
+      left: itemRect.left - wrapRect.left + itemRect.width/2,
+      top: itemRect.top - wrapRect.top + itemRect.height/2
+    };
+  }
+
+  function popPeachItem(item){
+    if(item.classList.contains('split')) return; // 割れてる間は連打しない
+    if(item._anim) item._anim.pause();
+    item.classList.add('split');
     playPop();
+
+    const pos = getRiverItemPos(item);
 
     setTimeout(function(){
       const praise = praises[Math.floor(Math.random()*praises.length)];
       speechText.textContent = praise;
+      speechBubble.style.left = pos.left + 'px';
+      speechBubble.style.top = Math.max(4, pos.top - 92) + 'px';
       speechBubble.classList.add('show');
-    }, 400);
+    }, 350);
+
+    setTimeout(function(){
+      speechBubble.classList.remove('show');
+      if(item._anim) item._anim.play();
+    }, 2400);
   }
 
-  function resetBonus(){
-    floatingPeach.classList.remove('split');
-    floatingPeach.style.animationPlayState = 'running';
+  function popCharacterItem(item){
+    playPop();
+    const pos = getRiverItemPos(item);
+    const mark = document.createElement('div');
+    mark.className = 'pop-mark';
+    mark.innerHTML = POP_MARK_SVGS[Math.floor(Math.random()*POP_MARK_SVGS.length)];
+    mark.style.left = pos.left + 'px';
+    mark.style.top = pos.top + 'px';
+    riverWrap.appendChild(mark);
+    setTimeout(function(){ mark.remove(); }, 1000);
+  }
+
+  function spawnRiverItem(){
+    if(!riverWrap) return;
+    const isPeach = Math.random() < 0.55;
+    const item = document.createElement('div');
+    item.className = 'river-item';
+
+    if(isPeach){
+      item.innerHTML = RIVER_PEACH_SVG;
+      item.addEventListener('click', function(){ popPeachItem(item); });
+    } else {
+      const name = charNames[Math.floor(Math.random()*charNames.length)];
+      const img = document.createElement('img');
+      img.src = charImages[name];
+      item.appendChild(img);
+      item.addEventListener('click', function(){ popCharacterItem(item); });
+    }
+
+    const topPos = 40 + Math.random()*110; // 川の帯の範囲内
+    item.style.top = topPos + 'px';
+    item.style.left = '-60px';
+    riverWrap.appendChild(item);
+
+    const duration = 7000 + Math.random()*2500;
+    const wrapWidth = riverWrap.clientWidth;
+    const anim = item.animate(
+      [
+        { left: '-60px', transform: 'rotate(-6deg)' },
+        { left: (wrapWidth*0.5) + 'px', transform: 'rotate(6deg)', offset:0.5 },
+        { left: (wrapWidth + 60) + 'px', transform: 'rotate(-6deg)' }
+      ],
+      { duration: duration, easing: 'linear' }
+    );
+    item._anim = anim;
+    anim.onfinish = function(){ item.remove(); };
+  }
+
+  function startRiverScene(){
+    stopRiverScene();
+    for(let i=0;i<2;i++){
+      setTimeout(spawnRiverItem, i*900);
+    }
+    riverSpawnTimer = setInterval(spawnRiverItem, 4000);
+  }
+
+  function stopRiverScene(){
+    if(riverSpawnTimer) clearInterval(riverSpawnTimer);
+    riverSpawnTimer = null;
+    if(riverWrap) riverWrap.querySelectorAll('.river-item, .pop-mark').forEach(function(el){ el.remove(); });
     speechBubble.classList.remove('show');
   }
-
-  floatingPeach.addEventListener('click', popPeach);
 
   peachBtn.addEventListener('click', reveal);
   closeBtn.addEventListener('click', closeResult);
