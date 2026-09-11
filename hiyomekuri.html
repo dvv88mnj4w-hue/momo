@@ -42,6 +42,10 @@
     background-repeat:no-repeat;
     padding:60px 44px;
   }
+  .frame.no-pattern{
+    background-image:none;
+    background-color:#fff;
+  }
 
   .panel{
     width:100%;
@@ -430,7 +434,7 @@
   .speech-bubble span{
     font-family:'Zen Maru Gothic', sans-serif;
     font-weight:700;
-    font-size:15px;
+    font-size:12px;
     line-height:1.6;
     color:var(--ink);
   }
@@ -445,7 +449,7 @@
 </head>
 <body>
 
-<div class="frame">
+<div class="frame" id="frame">
 
   <!-- トップ画面 -->
   <div class="panel" id="topPanel">
@@ -764,6 +768,7 @@
       setTimeout(function(){
         resultPanel.classList.remove('show');
         bonusPanel.classList.add('show');
+        frame.classList.add('no-pattern');
       }, 4500);
     }, 850);
   }
@@ -775,10 +780,12 @@
     peachBtn.classList.remove('split');
     peachBtn.classList.add('peach-bounce');
     tapMe.classList.remove('hide');
+    frame.classList.remove('no-pattern');
     resetBonus();
   }
 
   // ---- ひみつのエンディング（川を流れる桃） ----
+  const frame = document.getElementById('frame');
   const bonusPanel = document.getElementById('bonusPanel');
   const floatingPeach = document.getElementById('floatingPeach');
   const speechBubble = document.getElementById('speechBubble');
