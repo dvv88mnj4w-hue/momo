@@ -991,32 +991,60 @@
 
     if(!maxWidth || ctx.measureText(text).width <= maxWidth) return text;
 
-    // 、や。の直後を改行候補にする（最後の文字は除く）
-    const candidates = [];
-    for(let i=0;i<text.length-1;i++){
-      if(text[i] === '、' || text[i] === '。') candidates.push(i+1);
-    }
-
-    let best = null, bestScore = Infinity;
-    candidates.forEach(function(idx){
+    function fitsBoth(idx){
       const a = text.slice(0, idx);
       const b = text.slice(idx);
-      if(ctx.measureText(a).width <= maxWidth && ctx.measureText(b).width <= maxWidth){
-        const score = Math.abs(a.length - b.length);
-        if(score < bestScore){ bestScore = score; best = idx; }
+      return ctx.measureText(a).width <= maxWidth && ctx.measureText(b).width <= maxWidth;
+    }
+    function bestOf(idxList){
+      let best = null, bestScore = Infinity;
+      idxList.forEach(function(idx){
+        if(fitsBoth(idx)){
+          const score = Math.abs(idx - (text.length - idx));
+          if(score < bestScore){ bestScore = score; best = idx; }
+        }
+      });
+      return best;
+    }
+
+    // 1. まず句読点（、。）の直後を最優先の改行候補にする
+    const punctCandidates = [];
+    for(let i=0;i<text.length-1;i++){
+      if(text[i] === '、' || text[i] === '。') punctCandidates.push(i+1);
+    }
+    let best = bestOf(punctCandidates);
+
+    // 2. 句読点で収まらない場合は、助詞の直後を候補にする（自然な区切りに近づける）
+    if(best === null){
+      const particles = ['という','ければ','ながら','けれど','だから','ですが','なので','のに','ては','では','には','とは','から','まで','より','ので','たら','れば','ても','でも',
+                          'は','が','を','に','で','と','も','の','へ','や','し','ば','ね','よ'];
+      const particleCandidates = [];
+      for(let i=1;i<text.length-1;i++){
+        for(const p of particles){
+          if(text.slice(i-p.length+1, i+1) === p){
+            let idx = i+1;
+            // 「、」や「。」が次の行の先頭に来てしまう場合は、そのまま前の行に含める
+            while(idx < text.length && (text[idx] === '、' || text[idx] === '。')) idx++;
+            particleCandidates.push(idx);
+            break;
+          }
+        }
       }
-    });
+      best = bestOf(particleCandidates);
+    }
 
     if(best !== null){
       return text.slice(0, best) + '\n' + text.slice(best);
     }
 
-    // 句読点でうまく収まらない場合は、幅ぴったりで機械的に折り返す
+    // 3. それでも収まらない場合は、幅ぴったりで機械的に折り返す
+    //    （句読点だけは行の先頭に来ないよう、前の行にくっつける）
     let lines = [];
     let current = '';
     for(const ch of text){
       const test = current + ch;
-      if(ctx.measureText(test).width > maxWidth && current){
+      const isPunct = (ch === '、' || ch === '。');
+      if(ctx.measureText(test).width > maxWidth && current && !isPunct){
         lines.push(current);
         current = ch;
       } else {
